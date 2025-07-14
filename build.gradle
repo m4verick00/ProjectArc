@@ -1,0 +1,28 @@
+// Top-level build file for ArcLogbook
+buildscript {
+    ext {
+        compose_version = '1.6.0'
+        hilt_version = '2.51'
+        room_version = '2.6.1'
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.11.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = 'https://jitpack.io' }
+        maven { url = 'https://maven.google.com' }
+        maven { url = 'https://maven.aliyun.com/nexus/content/repositories/central/' }
+        maven { url = 'https://maven.microsoft.com/' }
+    }
+}

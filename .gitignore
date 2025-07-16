@@ -1,0 +1,3 @@
+# Ignore Java heap dumps and large files
+*.hprof
+java_pid*.hprof

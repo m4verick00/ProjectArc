@@ -10,14 +10,17 @@ import com.arclogbook.ui.theme.ArcThemeType
 @Composable
 fun ArcLogbookApp() {
     var themeType by remember { mutableStateOf(ArcThemeType.CYBERPUNK) }
-    ArcLogbookTheme(themeType = themeType) {
+    var selectedFont by remember { mutableStateOf("Orbitron") }
+    ArcLogbookTheme(themeType = themeType, font = selectedFont) {
         Surface(color = MaterialTheme.colorScheme.background) {
             val navController = rememberNavController()
             MainScaffold(navController = navController) {
                 ArcLogbookNavGraph(
                     navController = navController,
                     currentTheme = themeType,
-                    onThemeChange = { themeType = it }
+                    onThemeChange = { themeType = it },
+                    currentFont = selectedFont,
+                    onFontChange = { selectedFont = it }
                 )
             }
         }

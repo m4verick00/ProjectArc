@@ -1,5 +1,8 @@
 package com.arclogbook.data
 
+// Privacy: No device identifiers (IMEI, MAC, Android ID) are collected or transmitted in this module.
+// Only log entry data is stored and managed securely.
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable

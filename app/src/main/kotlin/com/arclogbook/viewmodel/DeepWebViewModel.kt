@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.arclogbook.deepweb.DeepWebAlert
 import com.arclogbook.data.LogEntryDao
 import com.arclogbook.data.LogEntry
+import com.arclogbook.security.GlobalErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,14 +24,22 @@ class DeepWebViewModel @Inject constructor(
     )
 
     fun searchDeepWeb(keyword: String, source: String) {
-        // Simulate a deep web alert
-        val alert = DeepWebAlert(
-            keyword = keyword,
-            source = source,
-            snippet = "Simulated hit for '$keyword' on $source.",
-            timestamp = System.currentTimeMillis()
-        )
-        _alerts.value = _alerts.value + alert
+        try {
+            // Simulate a deep web alert
+            val alert = DeepWebAlert(
+                keyword = keyword,
+                source = source,
+                snippet = "Simulated hit for '$keyword' on $source.",
+                timestamp = System.currentTimeMillis()
+            )
+            _alerts.value = _alerts.value + alert
+        } catch (e: Exception) {
+            GlobalErrorLogger.logError(
+                error = e,
+                context = "searchDeepWeb",
+                userAction = "Keyword: $keyword, Source: $source",
+            )
+        }
     }
 
     fun saveAlertToLogbook(alert: DeepWebAlert) = viewModelScope.launch {

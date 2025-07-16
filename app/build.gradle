@@ -22,6 +22,15 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = '1.5.10'
     }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+        }
+    }
 }
 
 dependencies {
@@ -53,6 +62,8 @@ dependencies {
     implementation "com.google.accompanist:accompanist-placeholder-material:0.34.0"
     implementation "com.airbnb.android:lottie-compose:6.4.0"
     implementation "androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha13"
+    implementation "io.coil-kt:coil-compose:2.4.0"
+    implementation "com.github.tehras:charts:0.2.4"
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.mockito:mockito-core:5.2.0"

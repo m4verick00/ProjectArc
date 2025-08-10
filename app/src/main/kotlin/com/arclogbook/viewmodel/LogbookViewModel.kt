@@ -6,9 +6,11 @@ import com.arclogbook.data.LogEntry
 import com.arclogbook.data.LogEntryDao
 import com.arclogbook.security.GlobalErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
+import androidx.paging.PagingData
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,6 +20,13 @@ class LogbookViewModel @Inject constructor(
 ) : ViewModel() {
     val logEntries: StateFlow<List<LogEntry>> = logEntryDao.getAll()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    // Paging (consumers can opt-in for large lists)
+    val pagedLogEntries: Flow<PagingData<LogEntry>> = Pager(
+        config = PagingConfig(pageSize = 50, prefetchDistance = 2, enablePlaceholders = false, initialLoadSize = 100)
+    ) { logEntryDao.pagingAll() }
+        .flow
+        .cachedIn(viewModelScope)
 
     var errorMessage: String = ""
     fun addLog(entry: LogEntry) = viewModelScope.launch {
@@ -56,6 +65,12 @@ class LogbookViewModel @Inject constructor(
     fun searchLogs(tag: String, keyword: String): StateFlow<List<LogEntry>> =
         logEntryDao.search(tag, keyword)
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    fun pagingSearch(tag: String, keyword: String): Flow<PagingData<LogEntry>> = Pager(
+        config = PagingConfig(pageSize = 40, prefetchDistance = 2, enablePlaceholders = false)
+    ) { logEntryDao.pagingSearch(tag, keyword) }
+        .flow
+        .cachedIn(viewModelScope)
 
     private val _notes = mutableListOf<String>()
     private val _evidence = mutableListOf<String>()

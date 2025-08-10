@@ -2,17 +2,30 @@ package com.arclogbook.data
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import androidx.paging.PagingSource
 
 @Dao
 interface LogEntryDao {
     @Query("SELECT * FROM log_entries ORDER BY timestamp DESC")
     fun getAll(): Flow<List<LogEntry>>
 
+    @Query("SELECT * FROM log_entries ORDER BY timestamp DESC")
+    fun pagingAll(): PagingSource<Int, LogEntry>
+
     @Query("SELECT * FROM log_entries WHERE tags LIKE '%' || :tag || '%' OR content LIKE '%' || :keyword || '%' ORDER BY timestamp DESC")
     fun search(tag: String, keyword: String): Flow<List<LogEntry>>
 
+    @Query("SELECT * FROM log_entries WHERE tags LIKE '%' || :tag || '%' OR content LIKE '%' || :keyword || '%' ORDER BY timestamp DESC")
+    fun pagingSearch(tag: String, keyword: String): PagingSource<Int, LogEntry>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: LogEntry)
+
+    @Query("SELECT * FROM log_entries WHERE type = :type ORDER BY timestamp DESC")
+    fun getByType(type: String): Flow<List<LogEntry>>
+
+    @Query("SELECT * FROM log_entries WHERE type = :type ORDER BY timestamp DESC")
+    fun pagingByType(type: String): PagingSource<Int, LogEntry>
 
     @Update
     suspend fun update(entry: LogEntry)

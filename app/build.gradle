@@ -25,24 +25,34 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             minifyEnabled false
         }
     }
+    packagingOptions {
+        resources {
+            excludes += ["/META-INF/{AL2.0,LGPL2.1}"]
+        }
+    }
 }
 
 dependencies {
     implementation "androidx.core:core-ktx:1.13.1"
+    implementation "androidx.core:core-splashscreen:1.0.1" // SplashScreen API
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.7.0"
     implementation "androidx.activity:activity-compose:1.9.0"
     implementation "androidx.compose.ui:ui:1.6.0"
     implementation "androidx.compose.material3:material3:1.2.0"
     implementation "androidx.compose.ui:ui-tooling-preview:1.6.0"
+    implementation "androidx.compose.material:material-icons-extended:1.6.0" // Extended Material Icons
     debugImplementation "androidx.compose.ui:ui-tooling:1.6.0"
     implementation "androidx.navigation:navigation-compose:2.7.7"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0"
+    implementation "androidx.documentfile:documentfile:1.0.1" // File access for model dropdown
+    implementation "androidx.window:window:1.2.0" // Foldable/window size classes
     implementation "androidx.room:room-runtime:2.6.1"
     kapt "androidx.room:room-compiler:2.6.1"
     implementation "androidx.room:room-ktx:2.6.1"
@@ -64,9 +74,44 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha13"
     implementation "io.coil-kt:coil-compose:2.4.0"
     implementation "com.github.tehras:charts:0.2.4"
+    implementation project(":shared")
+    // Paging for large log / OSINT / scan result lists
+    implementation "androidx.paging:paging-runtime-ktx:3.3.0"
+    implementation "androidx.paging:paging-compose:3.3.0"
+    // AndroidX Security for device-bound keys / encrypted prefs (zero-trust module)
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
+    // QR / ZKP sharing visuals
+    implementation "com.google.zxing:core:3.5.2"
+    // ARCore / Sceneform
+    implementation "com.google.ar:core:1.44.0"
+    implementation "com.gorisse.thomas.sceneform:sceneform:1.23.0"
+
+    // Retrofit / Networking for Recon modules
+    implementation "com.squareup.retrofit2:retrofit:2.11.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.11.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.12.0"
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
+    implementation "androidx.compose.foundation:foundation:1.6.0"
+    // On-device ML for vulnerability prediction (local only)
+    implementation "org.tensorflow:tensorflow-lite:2.14.0"
+    implementation "org.tensorflow:tensorflow-lite-select-tf-ops:2.14.0"
+    implementation "org.tensorflow:tensorflow-lite-support:0.4.4"
+    // Mail (test email sending for phishing simulations - user configured, self-test only)
+    implementation "com.sun.mail:android-mail:1.6.7"
+    implementation "com.sun.mail:android-activation:1.6.7"
+    // Bouncy Castle (for PQC / Kyber placeholder) - real Kyber requires external lib or JNI; using BC for AES + entropy
+    implementation "org.bouncycastle:bcprov-jdk18on:1.78.1"
+    // OpenStreetMap / osmdroid for geospatial OSINT mapping
+    implementation "org.osmdroid:osmdroid-android:6.1.18"
+    implementation "com.google.android.gms:play-services-location:21.2.0"
+    // Baseline profile installer (improves startup performance when profile artifacts packaged)
+    implementation "androidx.profileinstaller:profileinstaller:1.3.1"
+    // Haptic feedback uses VibratorManager (no extra dependency) but keep backward compat
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.mockito:mockito-core:5.2.0"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3"
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
     androidTestImplementation "androidx.test.ext:junit:1.1.5"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.6.0"

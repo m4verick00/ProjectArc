@@ -9,6 +9,12 @@ import com.arclogbook.security.GlobalErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,6 +24,10 @@ class PastebinViewModel @Inject constructor(
 ) : ViewModel() {
     private val _alerts = MutableStateFlow<List<PastebinAlert>>(emptyList())
     val alerts: StateFlow<List<PastebinAlert>> = _alerts
+
+    val pagedAlerts: Flow<PagingData<PastebinAlert>> = Pager(
+        PagingConfig(pageSize = 25, enablePlaceholders = false, initialLoadSize = 50)
+    ) { InMemoryPastebinPagingSource { _alerts.value } }.flow.cachedIn(viewModelScope)
 
     val sources = listOf("Pastebin", "Ghostbin", "Telegram")
 
@@ -35,7 +45,7 @@ class PastebinViewModel @Inject constructor(
                 snippet = "Simulated paste for '$keyword' on $source.",
                 timestamp = System.currentTimeMillis()
             )
-            _alerts.value = _alerts.value + alert
+            _alerts.update { it + alert }
         } catch (e: Exception) {
             errorMessage = "Pastebin monitor failed: ${e.message}".take(128)
             GlobalErrorLogger.logError(

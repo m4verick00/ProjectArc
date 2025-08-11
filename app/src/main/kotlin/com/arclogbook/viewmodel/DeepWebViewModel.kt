@@ -9,6 +9,12 @@ import com.arclogbook.security.GlobalErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,6 +24,10 @@ class DeepWebViewModel @Inject constructor(
 ) : ViewModel() {
     private val _alerts = MutableStateFlow<List<DeepWebAlert>>(emptyList())
     val alerts: StateFlow<List<DeepWebAlert>> = _alerts
+
+    val pagedAlerts: Flow<PagingData<DeepWebAlert>> = Pager(
+        PagingConfig(pageSize = 25, enablePlaceholders = false, initialLoadSize = 50)
+    ) { InMemoryDeepWebPagingSource { _alerts.value } }.flow.cachedIn(viewModelScope)
 
     val sources = listOf(
         "Pastebin", "Ghostbin", "Dread (onion)", "Ahmia (onion)", "Telegram", "BreachForums", "IntelX", "OnionPaste"
@@ -32,7 +42,7 @@ class DeepWebViewModel @Inject constructor(
                 snippet = "Simulated hit for '$keyword' on $source.",
                 timestamp = System.currentTimeMillis()
             )
-            _alerts.value = _alerts.value + alert
+            _alerts.update { it + alert }
         } catch (e: Exception) {
             GlobalErrorLogger.logError(
                 error = e,

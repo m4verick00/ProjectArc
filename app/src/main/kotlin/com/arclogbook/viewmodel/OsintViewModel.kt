@@ -11,6 +11,12 @@ import com.arclogbook.security.GlobalErrorLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import kotlinx.coroutines.flow.Flow
+import androidx.paging.cachedIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,6 +26,11 @@ class OsintViewModel @Inject constructor(
 ) : ViewModel() {
     private val _osintResults = MutableStateFlow<List<OsintResult>>(emptyList())
     val osintResults: StateFlow<List<OsintResult>> = _osintResults
+
+    // In-memory paging for now (simulate until persisted). If persistence added, swap to PagingSource DAO.
+    val pagedOsintResults: Flow<PagingData<OsintResult>> = Pager(
+        PagingConfig(pageSize = 30, enablePlaceholders = false, initialLoadSize = 60)
+    ) { InMemoryOsintPagingSource { _osintResults.value } }.flow.cachedIn(viewModelScope)
 
     val availableSources = OsintSources.sources
 
@@ -48,7 +59,7 @@ class OsintViewModel @Inject constructor(
                             result = resultText,
                             timestamp = System.currentTimeMillis()
                         )
-                        _osintResults.value = _osintResults.value + result
+                        _osintResults.update { it + result }
                     }
                     "Shodan (India)" -> {
                         // Example: Real API call (requires API key)
@@ -66,7 +77,7 @@ class OsintViewModel @Inject constructor(
                             result = resultText,
                             timestamp = System.currentTimeMillis()
                         )
-                        _osintResults.value = _osintResults.value + result
+                        _osintResults.update { it + result }
                     }
                     "CERT-In (Indian Cyber Alerts)" -> {
                         val response = RetrofitInstance.api.getCertInAlerts()
@@ -82,7 +93,7 @@ class OsintViewModel @Inject constructor(
                             result = resultText,
                             timestamp = System.currentTimeMillis()
                         )
-                        _osintResults.value = _osintResults.value + result
+                        _osintResults.update { it + result }
                     }
                     else -> {
                         // Simulate for other sources
@@ -93,7 +104,7 @@ class OsintViewModel @Inject constructor(
                             result = "Simulated result for $target ($queryType) from $source",
                             timestamp = System.currentTimeMillis()
                         )
-                        _osintResults.value = _osintResults.value + result
+                        _osintResults.update { it + result }
                     }
                 }
             } catch (e: Exception) {

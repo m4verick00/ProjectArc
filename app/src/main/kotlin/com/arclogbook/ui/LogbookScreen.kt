@@ -7,19 +7,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material.icons.filled.Insights
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import java.io.File
 import androidx.navigation.NavController
 import java.util.Calendar
+import com.arclogbook.ui.util.rememberIsWideScreen
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -96,28 +88,86 @@ fun LogbookScreen(viewModel: LogbookViewModel = hiltViewModel(), syncViewModel: 
     val storagePermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) imagePickerLauncher.launch("image/*")
     }
-    val filteredEntries = logEntries.filter {
-        (searchQuery.isBlank() || it.content.contains(searchQuery, true) || it.tags.contains(searchQuery, true)) &&
-        (!showFavoritesOnly || it.isFavorite)
+    // Placeholder search + filter state (actual data binding omitted for brevity in refactor scaffold)
+    var search by remember { mutableStateOf("") }
+    val entries by viewModel.logEntries.collectAsState()
+    val filteredEntries: List<LogEntry> = remember(search, entries) {
+        entries.filter { it.content.contains(search, true) || it.tags.contains(search, true) }
     }
     // Cyberpunk-styled logbook UI
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(Brush.linearGradient(listOf(Color(0xFF181A20), Color(0xFF23272E), Color(0xFF00FFFF).copy(alpha = 0.15f))))
-            .padding(16.dp)
-            .animateContentSize()
-    ) {
-        Text("Logbook", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
-        Divider()
-        CyberpunkButton(onClick = { showAddDialog = true }, text = "Add Entry", color = MaterialTheme.colorScheme.primary)
-        CyberpunkButton(onClick = { showStats = !showStats }, text = "Show Stats", color = MaterialTheme.colorScheme.secondary)
-        CyberpunkButton(onClick = { showVoiceInput = true }, text = "Voice Input", color = MaterialTheme.colorScheme.tertiary)
-        CyberpunkButton(onClick = { storagePermissionLauncher.launch("android.permission.READ_EXTERNAL_STORAGE") }, text = "Add Attachment", color = MaterialTheme.colorScheme.primary)
-        // Entries list
-        LazyColumn {
-            items(filteredEntries) { entry ->
-                // Cyberpunk-styled entry card
+    val isWide = rememberIsWideScreen()
+    Scaffold(
+        topBar = {
+            SmallTopAppBar(title = { Text("Logbook", fontWeight = FontWeight.Bold) }, actions = {
+                IconButton(onClick = { /* search focus */ }) { Icon(Icons.Filled.Search, contentDescription = "Search") }
+            })
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showAddDialog = true }) { Icon(Icons.Filled.Add, contentDescription = "Add Entry") }
+        }
+    ) { inner ->
+        if (!isWide) {
+            Column(
+                Modifier
+                    .padding(inner)
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = search,
+                    onValueChange = { search = it },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    label = { Text("Search logs") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(12.dp))
+                LazyColumn(Modifier.fillMaxSize()) {
+                    items(filteredEntries) { entry ->
+                        ElevatedCard(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                            Column(Modifier.padding(12.dp)) {
+                                Text(entry.content, style = MaterialTheme.typography.bodyMedium)
+                                Text(entry.tags, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            Row(
+                Modifier
+                    .padding(inner)
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(12.dp)
+            ) {
+                Column(Modifier.weight(0.45f).fillMaxHeight()) {
+                    OutlinedTextField(
+                        value = search,
+                        onValueChange = { search = it },
+                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                        label = { Text("Search logs") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    LazyColumn(Modifier.fillMaxSize()) {
+                        items(filteredEntries) { entry ->
+                            ElevatedCard(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                                Column(Modifier.padding(12.dp)) {
+                                    Text(entry.content, style = MaterialTheme.typography.bodyMedium)
+                                    Text(entry.tags, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                // Placeholder detail / stats panel
+                Column(Modifier.weight(0.55f).fillMaxHeight()) {
+                    Text("Detail / Stats", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Divider(Modifier.padding(vertical = 8.dp))
+                    Text("Select a log entry to view enriched metadata, attachments, chain-of-custody timeline, and AI summaries.", style = MaterialTheme.typography.bodySmall)
+                }
             }
         }
     }

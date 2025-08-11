@@ -4,7 +4,9 @@ import android.content.Context
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.LinkedHashMap
-import kotlin.math.min
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 class LLMManager(private val context: Context) {
     private val modelFileName = "phi-2.Q4_K_M.gguf"
@@ -39,5 +41,26 @@ class LLMManager(private val context: Context) {
         val result = "[LLM] $prompt"
         synchronized(cache) { cache[prompt] = result }
         return result
+    }
+
+    /** Stream inference tokens (simulated) returning a cold Flow of incremental text. */
+    fun streamInference(prompt: String, delayPerTokenMs: Long = 40L): Flow<String> = callbackFlow {
+        if (!isLoaded) loadModel()
+        val cached = synchronized(cache) { cache[prompt] }
+        if (cached != null) {
+            trySend(cached)
+            close(); return@callbackFlow
+        }
+        // Simulate tokenization by splitting on whitespace
+        val tokens = ("[LLM] " + prompt).split(" ")
+        val builder = StringBuilder()
+        for (t in tokens) {
+            builder.append(t).append(' ')
+            trySend(builder.toString())
+            delay(delayPerTokenMs)
+        }
+        val final = builder.toString().trimEnd()
+        synchronized(cache) { cache[prompt] = final }
+        close()
     }
 }

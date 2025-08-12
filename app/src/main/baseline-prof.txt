@@ -1,0 +1,5 @@
+# Placeholder baseline profile - generated via Baseline Profile Gradle task in a real project
+# Keep critical composables and startup classes hot
+HSPL com/arclogbook/MainActivity
+HSPL com/arclogbook/viewmodel/PerfDashboardViewModel
+HSPL com/arclogbook/viewmodel/LogbookViewModel

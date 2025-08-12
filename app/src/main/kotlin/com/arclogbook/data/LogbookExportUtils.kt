@@ -1,3 +1,5 @@
+// Privacy: This module does not collect, transmit, or use device identifiers (IMEI, MAC, Android ID, etc). All data is stored securely and privately. See ArcLogbook privacy policy for details.
+
 package com.arclogbook.data
 
 import android.content.Context

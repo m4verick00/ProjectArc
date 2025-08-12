@@ -6,12 +6,18 @@
         android:icon="@mipmap/ic_launcher"
         android:label="ArcLogbook"
         android:theme="@style/Theme.ArcLogbook">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- All other activities/services should be android:exported="false" unless needed -->
     </application>
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <!-- Remove any unnecessary permissions for security -->
 
 </manifest>

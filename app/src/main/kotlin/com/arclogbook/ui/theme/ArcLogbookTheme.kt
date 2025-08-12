@@ -52,19 +52,18 @@ fun ArcLogbookTheme(
     themeType: ArcThemeType = ArcThemeType.CYBERPUNK,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when (themeType) {
+    val colors = when (themeType) {
         ArcThemeType.CYBERPUNK -> CyberpunkColorScheme
         ArcThemeType.MINIMALISTIC -> MinimalisticColorScheme
         ArcThemeType.CLASSIC -> ClassicColorScheme
     }
-    val typography = when (themeType) {
-        ArcThemeType.CYBERPUNK -> cyberpunkTypography
-        ArcThemeType.MINIMALISTIC -> minimalisticTypography
-        ArcThemeType.CLASSIC -> classicTypography
-    }
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = typography,
+        colorScheme = colors,
+        typography = when (themeType) {
+            ArcThemeType.CYBERPUNK -> cyberpunkTypography
+            ArcThemeType.MINIMALISTIC -> minimalisticTypography
+            ArcThemeType.CLASSIC -> classicTypography
+        },
         content = content
     )
 }

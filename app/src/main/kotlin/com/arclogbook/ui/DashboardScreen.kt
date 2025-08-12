@@ -15,6 +15,24 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import com.arclogbook.plugin.PluginManager
+import com.arclogbook.security.OfflineModeUtils
+import com.arclogbook.voice.CyberpunkVoiceAssistant
+import com.arclogbook.ui.widget.QuickLogWidget
+import com.arclogbook.ui.MultiInstanceManager
+import com.arclogbook.security.AccessibilityAuditUtils
+import com.arclogbook.devtools.InAppCodeEditor
+import com.arclogbook.devtools.ApiExplorer
+import androidx.compose.ui.platform.LocalContext
+import com.arclogbook.ui.TimelineMapScreen
+import com.arclogbook.report.ReportGenerator
+import com.arclogbook.collab.CollaborationUtils
+import com.arclogbook.threatintel.ThreatIntelFeeds
+import com.arclogbook.automation.ScriptEngine
+import com.arclogbook.ui.VisualWorkflowBuilderScreen
+import androidx.compose.ui.text.font.FontWeight
+import com.arclogbook.analytics.LoggingAnalyticsDashboard
+import com.arclogbook.plugin.PluginMarketplace
 
 @Composable
 fun DashboardScreen(viewModel: LogbookViewModel = hiltViewModel()) {
@@ -31,45 +49,45 @@ fun DashboardScreen(viewModel: LogbookViewModel = hiltViewModel()) {
         }
     } else {
         Column(Modifier.padding(16.dp)) {
-            Text("Dashboard", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(16.dp))
-            MotionLayout(
-                motionScene = MotionScene("""
-                {
-                  ConstraintSets: {
-                    start: { card: { width: 'spread', height: 120, translationZ: 0 } },
-                    end: { card: { width: 'spread', height: 220, translationZ: 16 } }
-                  },
-                  Transitions: {
-                    default: { from: 'start', to: 'end', pathMotionArc: 'startVertical', duration: 400 }
-                  }
+            Text("Dashboard", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+            Divider()
+            CyberpunkButton(onClick = {
+                CyberpunkVoiceAssistant.startListening(LocalContext.current) { command ->
+                    // Handle voice command
                 }
-                """),
-                progress = 1f,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Card(
-                    Modifier
-                        .layoutId("card")
-                        .fillMaxWidth()
-                        .shadow(16.dp, cardShape)
-                        .clip(cardShape)
-                        .background(cardGradient),
-                    shape = cardShape,
-                    elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
-                ) {
-                    Column(Modifier.padding(16.dp)) {
-                        Text("Entries by Type: $typeCounts", style = MaterialTheme.typography.labelMedium)
-                        Text("Tags: $tagCounts", style = MaterialTheme.typography.labelMedium)
-                    }
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-            Text("Recent Activity:", style = MaterialTheme.typography.titleMedium)
-            recent.forEach {
-                Text("- [${it.type}] ${it.tags} (${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").format(java.util.Date(it.timestamp))})")
-            }
-            // TODO: Add charts/graphs for trends
+            }, text = "Voice Assistant", color = MaterialTheme.colorScheme.primary)
+            CyberpunkButton(onClick = {
+                // Quick log widget logic (simulate)
+            }, text = "Quick Log Widget", color = MaterialTheme.colorScheme.secondary)
+            CyberpunkButton(onClick = {
+                MultiInstanceManager.createInstance("Investigation ${System.currentTimeMillis()}")
+            }, text = "New Investigation Instance", color = MaterialTheme.colorScheme.tertiary)
+            CyberpunkButton(onClick = {
+                val instances = MultiInstanceManager.getInstances()
+                // Show instances in dialog/snackbar
+            }, text = "Show Instances", color = MaterialTheme.colorScheme.primary)
+            CyberpunkButton(onClick = {
+                val audit = AccessibilityAuditUtils.audit(listOf("", "Logbook entry", ""))
+                // Show audit results in dialog/snackbar
+            }, text = "Accessibility Audit", color = MaterialTheme.colorScheme.secondary)
+            CyberpunkButton(onClick = {
+                // Show in-app code editor
+            }, text = "Code Editor", color = MaterialTheme.colorScheme.tertiary)
+            CyberpunkButton(onClick = {
+                // Show API explorer
+            }, text = "API Explorer", color = MaterialTheme.colorScheme.primary)
+            CyberpunkButton(onClick = {
+                // Show timeline/map view
+                TimelineMapScreen()
+            }, text = "Timeline/Map View", color = MaterialTheme.colorScheme.primary)
+            CyberpunkButton(onClick = {
+                // Show analytics dashboard
+                LoggingAnalyticsDashboard.log("Dashboard viewed")
+            }, text = "Analytics Dashboard", color = MaterialTheme.colorScheme.secondary)
+            CyberpunkButton(onClick = {
+                // Show plugin marketplace
+                PluginMarketplace.discoverPlugins()
+            }, text = "Plugin Marketplace", color = MaterialTheme.colorScheme.tertiary)
         }
     }
 }
